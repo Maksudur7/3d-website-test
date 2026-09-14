@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>APEX TOWER 3D - Active Site, Vaku Excavator & Luxury Flat Tour</title>
+  <meta name="description" content="Immersive 3D WebGL active construction site showcase featuring Caterpillar Excavator (Vaku) on exterior ground, luxury flat room partition tour, and tower crane crown.">
+  <script type="module" crossorigin src="/assets/index-e43uK9wu.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-2aybv0H0.css">
+</head>
+<body class="dark-theme">
+  <!-- 3D WebGL Canvas Layer -->
+  <div id="canvas-container">
+    <canvas id="webgl-canvas"></canvas>
+  </div>
+
+  <!-- 3D Spatial Hotspots Container (Projected in 2D) -->
+  <div id="hotspot-container" aria-live="polite"></div>
+
+  <!-- HUD Header Overlay -->
+  <header class="hud-header">
+    <div class="brand-badge">
+      <span class="pulse-dot"></span>
+      <span class="brand-title">APEX TOWER 3D</span>
+      <span class="brand-sub">VAKU & LUXURY FLAT ROOM TOUR</span>
+    </div>
+    
+    <div class="hud-stats">
+      <div class="stat-item">
+        <span class="stat-label">3D TOUR STAGE</span>
+        <span class="stat-value" id="hud-structure-status">HERO OVERVIEW</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">FLAT UNIT</span>
+        <span class="stat-value">5 ROOM ZONES</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">FPS</span>
+        <span class="stat-value" id="hud-fps">60</span>
+      </div>
+    </div>
+
+    <button id="btn-inspect-drawer" class="btn-primary-hud" type="button" aria-label="Open Site Specifications">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+      <span>SPECS</span>
+    </button>
+  </header>
+
+  <!-- Side Floating Deck Controls -->
+  <aside class="control-deck" aria-label="3D View Deck Controls">
+    <div class="deck-group">
+      <label for="exploded-slider" class="deck-label">AUTO EXPLODE</label>
+      <input type="range" id="exploded-slider" min="0" max="100" value="0" class="custom-range" aria-label="Adjust exploded view separation">
+      <span class="deck-value-badge" id="exploded-val">0%</span>
+    </div>
+
+    <div class="deck-divider"></div>
+
+    <div class="deck-buttons">
+      <button id="btn-xray" class="deck-btn" type="button" data-tooltip="X-Ray Wireframe Mode">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="3"></line></svg>
+        <span>X-RAY</span>
+      </button>
+
+      <button id="btn-lighting" class="deck-btn" type="button" data-tooltip="Toggle Sunset / Night Mode">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line></svg>
+        <span>SUNSET</span>
+      </button>
+
+      <button id="btn-hotspots" class="deck-btn active" type="button" data-tooltip="Toggle Hotspot Tags">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+        <span>TAGS</span>
+      </button>
+
+      <button id="btn-autorotate" class="deck-btn" type="button" data-tooltip="Toggle 360 Orbit">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path></svg>
+        <span>ORBIT</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Bottom Floor Layer Selector -->
+  <nav class="floor-nav" aria-label="Floor and Layer Selection">
+    <span class="floor-nav-title">LAYERS</span>
+    <div class="floor-buttons">
+      <button class="floor-btn active" data-layer="all" type="button">FULL SITE</button>
+      <button class="floor-btn" data-layer="ground" type="button">EXCAVATOR (VAKU)</button>
+      <button class="floor-btn" data-layer="concrete" type="button">CONCRETE GRID</button>
+      <button class="floor-btn" data-layer="facade" type="button">GLASS FACADE</button>
+      <button class="floor-btn" data-layer="penthouse" type="button">LUXURY FLAT UNIT</button>
+      <button class="floor-btn" data-layer="crane" type="button">TOWER CRANE</button>
+    </div>
+  </nav>
+
+  <!-- Scrollable Automatic Storyline Track -->
+  <main id="scroll-track">
+    <!-- Section 1: Hero Intro -->
+    <section class="story-section" id="sec-hero">
+      <div class="section-card">
+        <span class="section-tag">ARCHITECTURAL SHOWCASE</span>
+        <h1>APEX TOWER 3D</h1>
+        <p class="hero-desc">Experience photorealistic CAT 330 Excavator (Vaku) on exterior ground yard and complete 6-stage automatic room fly-through tour.</p>
+        <div class="scroll-prompt">
+          <span>SCROLL TO AUTOMATICALLY TOUR ROOMS & CROWN IN 3D</span>
+          <div class="chevron-anim">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 2: Exterior Excavator Vaku -->
+    <section class="story-section" id="sec-excavator">
+      <div class="section-card">
+        <span class="section-tag">STAGE 01 • GROUND YARD</span>
+        <h2>Caterpillar CAT 330 Excavator</h2>
+        <p>Heavy crawler backhoe positioned 100% outside in front yard: steel caterpillar tracks, revolving cab, 3 chrome hydraulic pistons, and 5-tooth bucket.</p>
+        <div class="spec-grid">
+          <div class="spec-pill"><span>PISTONS</span><strong>3x Chrome Rams</strong></div>
+          <div class="spec-pill"><span>LOCATION</span><strong>Front Yard</strong></div>
+          <div class="spec-pill"><span>TRACKS</span><strong>Steel Tread</strong></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 3: Concrete Framework & Facade -->
+    <section class="story-section" id="sec-concrete">
+      <div class="section-card">
+        <span class="section-tag">STAGE 02 • TOWER FACADE</span>
+        <h2>Concrete Grid & Glass Facade</h2>
+        <p>Weathered C50 concrete columns and double-glazed curtain wall facade panels surrounding central shear elevator core shaft.</p>
+        <div class="spec-grid">
+          <div class="spec-pill"><span>CONCRETE</span><strong>Grade C50</strong></div>
+          <div class="spec-pill"><span>FACADE</span><strong>Double Glazed</strong></div>
+          <div class="spec-pill"><span>COLUMNS</span><strong>16 Grid Posts</strong></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 4: Drawing Lounge 360 Orbit -->
+    <section class="story-section" id="sec-drawing">
+      <div class="section-card">
+        <span class="section-tag">STAGE 03 • DRAWING LOUNGE 360°</span>
+        <h2>Executive TV Console & Lounge</h2>
+        <p>White 4-drawer TV media unit, wall-mounted 65" thin-bezel black TV, charcoal linen L-sofa, white rug, marble coffee table, and study desk with laptop.</p>
+        <div class="spec-grid">
+          <div class="spec-pill"><span>TV DISPLAY</span><strong>65" Thin Bezel</strong></div>
+          <div class="spec-pill"><span>SOFA</span><strong>Charcoal Linen</strong></div>
+          <div class="spec-pill"><span>DESK</span><strong>Study Corner</strong></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 5: Gourmet Kitchen & Dining 360 Orbit -->
+    <section class="story-section" id="sec-kitchen">
+      <div class="section-card">
+        <span class="section-tag">STAGE 04 • KITCHEN & DINING 360°</span>
+        <h2>Gourmet Kitchen & Dining</h2>
+        <p>L-shaped white cabinetry with dark granite countertop, stainless sink with arching chrome faucet, induction cooktop, fridge & 4-chair dining set.</p>
+        <div class="spec-grid">
+          <div class="spec-pill"><span>COUNTER</span><strong>Dark Granite</strong></div>
+          <div class="spec-pill"><span>FAUCET</span><strong>Swan Chrome</strong></div>
+          <div class="spec-pill"><span>DINING</span><strong>4-Chair Set</strong></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 6: Master Bedroom Suite 360 Orbit -->
+    <section class="story-section" id="sec-bedroom">
+      <div class="section-card">
+        <span class="section-tag">STAGE 05 • MASTER BEDROOM 360°</span>
+        <h2>Master Bedroom Suite</h2>
+        <p>King bed with grey channel-tufted headboard, white duvet & fold sheet, 4 stacked pillows, nightstand lamp, 3 back wall art frames & double wardrobe closet.</p>
+        <div class="spec-grid">
+          <div class="spec-pill"><span>BED SIZE</span><strong>King Suite</strong></div>
+          <div class="spec-pill"><span>ARTWORK</span><strong>3 Canvas Frames</strong></div>
+          <div class="spec-pill"><span>STORAGE</span><strong>Double Closet</strong></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 7: Luxury Navy Spa Bathroom & Foyer 360 Orbit -->
+    <section class="story-section" id="sec-bathroom">
+      <div class="section-card">
+        <span class="section-tag">STAGE 06 • NAVY SPA BATHROOM 360°</span>
+        <h2>Navy Mosaic Tiles & Bathrobes</h2>
+        <p>Dark navy mosaic tiled floor & feature wall, 2 white bathrobes on stainless hooks, wall-hung porcelain toilet, glass shower & foyer dressing vanity mirror.</p>
+        <div class="spec-grid">
+          <div class="spec-pill"><span>TILES</span><strong>Navy Mosaic</strong></div>
+          <div class="spec-pill"><span>ROBES</span><strong>2 White Robes</strong></div>
+          <div class="spec-pill"><span>SHOWER</span><strong>Frameless Glass</strong></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 8: Balcony Terrace & Tower Crane Crown -->
+    <section class="story-section" id="sec-terrace">
+      <div class="section-card">
+        <span class="section-tag">STAGE 07 • BALCONY & TOWER CRANE</span>
+        <h2>Terrace & Tower Crane Crown</h2>
+        <p>Glass balustrade terrace with outdoor bistro table, potted Monstera green plant, soaring up to active yellow Tower Crane crown & sunset skyline.</p>
+        <div class="spec-grid">
+          <div class="spec-pill"><span>TERRACE</span><strong>Glass Balustrade</strong></div>
+          <div class="spec-pill"><span>CRANE</span><strong>Lattice Jib</strong></div>
+          <div class="spec-pill"><span>HORIZON</span><strong>Sunset Skyline</strong></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Technical Spec Inspection Drawer -->
+  <div id="spec-drawer" class="drawer" aria-hidden="true">
+    <div class="drawer-overlay" id="drawer-overlay"></div>
+    <div class="drawer-content">
+      <div class="drawer-header">
+        <h2>APEX TOWER • STRUCTURAL & FLAT UNIT SPECS</h2>
+        <button id="btn-close-drawer" class="btn-icon" type="button" aria-label="Close Specs Drawer">&times;</button>
+      </div>
+      <div class="drawer-body">
+        <div class="spec-detail-block">
+          <h3>Exterior Machinery (Vaku)</h3>
+          <ul>
+            <li><strong>Model:</strong> Caterpillar CAT 330 Hydraulic Backhoe Excavator</li>
+            <li><strong>Position:</strong> Front-left open yard (`x: -34, z: 28`) outside building footprint</li>
+            <li><strong>Hydraulics:</strong> Triple chrome-plated piston rams (`metalness: 0.98`)</li>
+          </ul>
+        </div>
+        <div class="spec-detail-block">
+          <h3>Full Luxury Apartment Floorplan</h3>
+          <ul>
+            <li><strong>Drawing Lounge:</strong> Italian Leather L-Sectional Sofa & Glass Coffee Table</li>
+            <li><strong>Dining & Kitchen:</strong> 6-Seater White Carrara Marble Table & Island Bar</li>
+            <li><strong>Master Bedroom:</strong> King Bed with Navy Velvet Headboard & Nightstands</li>
+            <li><strong>Spa Bathroom:</strong> Glass Shower Enclosure & Freestanding Oval Bathtub</li>
+            <li><strong>Balcony Terrace:</strong> Cantilevered Timber Decking & Glass Guardrails</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
